@@ -83,3 +83,15 @@ locals {
 
 - 既存号機を残したまま追加したい場合  
   → 新しい号機のコメントアウトを外して `terraform apply`
+
+
+---
+
+## ③ Terraform 初期化
+
+```bash
+terraform init
+
+
+
+
