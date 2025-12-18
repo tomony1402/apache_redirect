@@ -6,6 +6,9 @@
 *.tfstate.*
 *.swp
 
+# SSH / private key
+*.pem
+
 # Crash log files
 crash.log
 crash.*.log
