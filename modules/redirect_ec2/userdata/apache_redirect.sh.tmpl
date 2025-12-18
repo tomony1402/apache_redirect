@@ -1,0 +1,25 @@
+#!/bin/bash
+set -eux
+
+yum update -y
+yum install -y httpd
+
+systemctl enable httpd
+systemctl start httpd
+
+if ! grep -q "^Listen 8080" /etc/httpd/conf/httpd.conf; then
+  echo "Listen 8080" >> /etc/httpd/conf/httpd.conf
+fi
+
+cat > /etc/httpd/conf.d/redirect.conf << EOL
+<VirtualHost *:80>
+    Redirect permanent / http://${redirect_domain}/
+</VirtualHost>
+
+<VirtualHost *:8080>
+    Redirect permanent / http://${redirect_domain}/
+</VirtualHost>
+EOL
+
+systemctl restart httpd
+
