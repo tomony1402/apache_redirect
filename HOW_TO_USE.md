@@ -21,7 +21,7 @@ Apache リダイレクト用 EC2 を作成・管理するための手順書で�
 ## ① AWS リージョンの設定
 
 ### 編集するファイル
-`/root/appache/terrafrom2/main.tf`
+`/root/appache/terraform2/main.tf`
 
 ### 設定内容
 
@@ -35,9 +35,8 @@ provider "aws" {
   profile = "aws180"
 }
 
-注意点
+### 注意点
 
--使用するリージョンのコメントアウトを外す
--profile = "aws180" は削除しないこと
-
----
+- 使用するリージョンのコメントアウトを外す
+- `profile = "aws180"` は削除しないこと
+- この作業は必ず一人で実施すること
