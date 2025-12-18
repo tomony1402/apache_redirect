@@ -41,3 +41,48 @@ provider "aws" {
 ---
 
 ## ② 作成する EC2（号機）の指定
+
+## ② 作成する EC2（号機）の指定
+
+### 編集するファイル
+`/root/appache/terraform2/modules/redirect_ec2/main.tf`
+
+### 設定内容
+
+```hcl
+locals {
+  redirect_domains = {
+    web-34 = "tune-snowboarding.com"
+    web-38 = "wc4h16cy93xvaj.net"
+    web-39 = "awhmdoqexf.com"
+    web-40 = "agent-miogaginger.com"
+    web-43 = "zpkwtstcucghuy.com"
+    web-48 = "xhykcndqlfsnsk.com"
+
+    # web-51 = "27pckzcv8pccn.com"
+    # web-52 = "0udnenw27gp.com"
+    # web-53 = "attendance-proper.com"
+    # web-54 = "charmingagrarian.com"
+    # web-55 = "backboneimpinge.com"
+    # web-56 = "abattamzwr-gbjr.com"
+    # web-57 = "fdiaksbdibct-hsa.com"
+    # web-58 = "lzyqqkjtrjnwqoni-myhj.com"
+    # web-62 = "gaqgarcwmoylyxgi-iyzd.com"
+    # web-63 = "oonp.alive-netksee.com"
+    # web-64 = "madjievaness.com"
+    # web-65 = "fbnizkgcn.com"
+  }
+}
+
+```
+
+### 運用ルール
+
+- 作成したい号機のコメントアウトを外す
+- 一部リージョンでは一括作成できないため **3〜6台ずつ** 作成する
+
+- 既存号機を削除したい場合  
+  → 該当行をコメントアウトして `terraform apply`
+
+- 既存号機を残したまま追加したい場合  
+  → 新しい号機のコメントアウトを外して `terraform apply`
