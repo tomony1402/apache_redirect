@@ -99,3 +99,11 @@ terraform init
 ```bash
 terraform plan
 ```
+
+---
+
+## ⑤ リソース作成（反映）
+
+```bash
+terraform apply
+```
