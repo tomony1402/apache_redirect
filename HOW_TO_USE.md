@@ -42,8 +42,6 @@ provider "aws" {
 
 ## ② 作成する EC2（号機）の指定
 
-## ② 作成する EC2（号機）の指定
-
 ### 編集するファイル
 `/root/appache/terraform2/modules/redirect_ec2/main.tf`
 
@@ -58,7 +56,6 @@ locals {
     web-40 = "agent-miogaginger.com"
     web-43 = "zpkwtstcucghuy.com"
     web-48 = "xhykcndqlfsnsk.com"
-
     # web-51 = "27pckzcv8pccn.com"
     # web-52 = "0udnenw27gp.com"
     # web-53 = "attendance-proper.com"
