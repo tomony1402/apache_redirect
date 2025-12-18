@@ -107,3 +107,10 @@ terraform plan
 ```bash
 terraform apply
 ```
+
+---
+
+## ⑥ 不要リソースの削除（前回作成分）
+```bash
+terraform destroy
+```
