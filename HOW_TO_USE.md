@@ -12,8 +12,9 @@ Terraform を使用して、Apache リダイレクト用 EC2 を作成・管理�
 - 2.56.0.205
 
 -対象ディレクトリ
--/root/appache/terrafrom
--/root/appache/terrafrom2
+- /root/appache/terrafrom
+- /root/appache/terrafrom2
+
 ---
 
 ## ① AWS リージョンの設定
