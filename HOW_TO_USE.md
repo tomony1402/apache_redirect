@@ -35,4 +35,9 @@ provider "aws" {
   profile = "aws180"
 }
 
+注意点
 
+使用するリージョンのコメントアウトを外す
+profile = "aws180" は削除しないこと
+
+---
