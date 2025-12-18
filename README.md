@@ -9,7 +9,7 @@ HCP Terraform は使用せず、ローカル実行前提で運用します。
 
 ## この Terraform でやっていること
 
-- AWS 上に EC2 を 1 台作成する
+- AWS 上に EC2 を 18台作成する
 - Apache をインストールし、リダイレクト設定を行う
 - EC2 作成処理は `modules/redirect_ec2` に切り出している
 - SSH 接続用のキーペアを Terraform で生成する
