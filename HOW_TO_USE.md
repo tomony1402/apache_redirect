@@ -92,6 +92,9 @@ locals {
 ```bash
 terraform init
 
+---
 
+## ④ 実行計画の確認
 
-
+```bash
+terraform plan
