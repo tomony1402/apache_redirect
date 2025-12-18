@@ -114,3 +114,7 @@ terraform apply
 ```bash
 terraform destroy
 ```
+
+### ルール
+
+-前回作成した方を必ず削除
