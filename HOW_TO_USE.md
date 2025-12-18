@@ -20,6 +20,7 @@ Terraform を使用して、Apache リダイレクト用 EC2 を作成・管理�
 
 ### 設定内容
 
+```hcl
 provider "aws" {
   # region = "ap-northeast-1"
   region = "us-east-1"
@@ -28,4 +29,3 @@ provider "aws" {
 
   profile = "aws180"
 }
-
