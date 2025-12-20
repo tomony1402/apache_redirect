@@ -12,10 +12,10 @@ locals {
   redirect_domains = {
     web-34 = "tune-snowboarding.com"
     web-38 = "wc4h16cy93xvaj.net"
-    web-39 = "awhmdoqexf.com"
-    web-40 = "agent-miogaginger.com"
-    web-43 = "zpkwtstcucghuy.com"
-    web-48 = "xhykcndqlfsnsk.com"
+   # web-39 = "awhmdoqexf.com"
+   # web-40 = "agent-miogaginger.com"
+   # web-43 = "zpkwtstcucghuy.com"
+   # web-48 = "xhykcndqlfsnsk.com"
    # web-51 = "27pckzcv8pccn.com"
    # web-52 = "0udnenw27gp.com"
    # web-53 = "attendance-proper.com"
@@ -73,7 +73,7 @@ resource "aws_instance" "web" {
   for_each = local.redirect_domains
 
   ami           = data.aws_ami.amazon_linux.id
-  instance_type = "t3.micro"
+  instance_type = "t2.nano"
   key_name      = var.key_name
 
   associate_public_ip_address = true
