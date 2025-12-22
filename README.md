@@ -147,7 +147,7 @@ data "aws_ami" "almalinux" {
 }
 
 
-
+---
 
 ## ディレクトリ構成
 
