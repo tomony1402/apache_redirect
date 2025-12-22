@@ -181,6 +181,30 @@ resource "aws_instance" "web" {
 }
 
 ```
+### 全リージョン対応確認（AWS CLI）
+
+```bash
+for r in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text); do
+  count=$(aws ec2 describe-images \
+    --region "$r" \
+    --owners 764336703387 \
+    --filters "Name=name,Values=AlmaLinux OS 9*" \
+              "Name=architecture,Values=x86_64" \
+    --query "length(Images)" \
+    --output text)
+  printf "%-20s : %s\n" "$r" "$count"
+done
+
+## AlmaLinux サポート期間
+
+本構成では AlmaLinux 9 を使用している。
+
+- AlmaLinux 9
+  - フルサポート：～ 2027 年
+  - セキュリティ更新：～ 2032 年
+
+RHEL と同等のライフサイクルを持ち、
+長期運用を前提とした構成に適している。
 
 ## 料金目安（無料枠外・東京）
 
