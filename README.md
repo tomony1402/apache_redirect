@@ -195,6 +195,8 @@ for r in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text
   printf "%-20s : %s\n" "$r" "$count"
 done
 
+```
+
 ## AlmaLinux サポート期間
 
 本構成では AlmaLinux 9 を使用している。
