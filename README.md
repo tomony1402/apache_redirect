@@ -149,7 +149,7 @@ data "aws_ami" "almalinux" {
 
 ---
 
-##EC2定義
+## EC2定義
 ```hcl
 resource "aws_instance" "web" {
   for_each = local.redirect_domains
