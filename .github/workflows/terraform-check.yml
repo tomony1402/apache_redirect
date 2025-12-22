@@ -1,24 +1,34 @@
+# 1. この自動化処理（ワークフロー）の名前
 name: "Terraform Linter"
 
+# 2. いつ実行するか（トリガー）の指定
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - main  # mainブランチにコードがPushされたら実行
+  pull_request: # プルリクエスト（変更依頼）が作成された時も実行
 
+# 3. 具体的に何をやらせるか（ジョブ）の定義
 jobs:
   terraform-check:
     name: "Check Syntax"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 実行環境：最新のUbuntuサーバーを借りる
+    
+    # 実行する手順（ステップ）
     steps:
+      # 手順①：GitHub上のあなたのコードを、借りたサーバーにコピーする
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 手順②：サーバーにTerraformコマンドを使えるようにインストールする
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # 手順③：Terraformを初期化する
+      # ※backend=falseは、AWS(S3等)に接続せず構文チェックだけするための工夫
       - name: Terraform Init
         run: terraform init -backend=false
 
+      # 手順④：本番！すべての.tfファイルをスキャンして構文エラーを探す
       - name: Terraform Validate
         run: terraform validate
