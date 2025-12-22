@@ -1,3 +1,6 @@
+Terraform configuration for deploying ultra low-cost Apache-based redirect EC2 instances
+using AlmaLinux, supporting all AWS regions.
+
 # Apache Redirect on EC2 (Terraform)
 
 このリポジトリは、Terraform を使って  
