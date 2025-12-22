@@ -149,6 +149,39 @@ data "aws_ami" "almalinux" {
 
 ---
 
+##EC2定義
+```hcl
+resource "aws_instance" "web" {
+  for_each = local.redirect_domains
+
+  ami           = data.aws_ami.almalinux.id
+  instance_type = "t2.nano"
+
+  associate_public_ip_address = true
+
+  vpc_security_group_ids = [
+    aws_security_group.redirect.id
+  ]
+
+  root_block_device {
+    volume_size = 10   # 10 or 20
+    volume_type = "gp3"
+  }
+
+  user_data = templatefile(
+    "${path.module}/userdata/apache_redirect.sh.tmpl",
+    {
+      redirect_domain = each.value
+    }
+  )
+
+  tags = {
+    Name = each.key
+  }
+}
+
+```
+
 
 ## ディレクトリ構成
 
