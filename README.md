@@ -82,6 +82,73 @@ resource "aws_subnet" "public" {
 
 
 ---
+
+# Redirect EC2 (Low Cost / Multi-Region)
+
+Terraform で **低コストなリダイレクト専用 EC2** を  
+**複数リージョン対応**で作成する構成。
+
+最小構成（t2.nano + 最小EBS）を前提とし、  
+AMI は **リージョン依存を吸収する設計**にしている。
+
+---
+
+## 構成概要
+
+- OS: **AlmaLinux 9**
+- Instance Type: **t2.nano**
+- Root Volume: **10GB or 20GB (gp3)**
+- 用途: Apache による HTTP リダイレクト
+- デプロイ方式: Terraform
+- 対応リージョン: **全リージョン**
+
+---
+
+## 設計方針
+
+### なぜ AlmaLinux？
+- Amazon Linux 2023 は **ルートボリューム最小 30GB**
+- 20GB / 10GB に縮小できない
+- **AlmaLinux は最小 8〜10GB の AMI が存在**
+
+→ **EBS サイズを下げてコスト削減するため AlmaLinux を採用**
+
+---
+
+## AMI（全リージョン対応）
+
+AMI ID はリージョンごとに異なるため、  
+**ID を固定せず検索条件で取得**する。
+
+```hcl
+data "aws_ami" "almalinux" {
+  most_recent = true
+  owners      = ["764336703387"] # AlmaLinux OS Foundation
+
+  filter {
+    name   = "name"
+    values = ["AlmaLinux OS 9*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+
+
+
 ## ディレクトリ構成
 
 ```text

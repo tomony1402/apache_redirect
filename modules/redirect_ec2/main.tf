@@ -1,33 +1,59 @@
-data "aws_ami" "amazon_linux" {
+#data "aws_ami" "amazon_linux" {
+#  most_recent = true
+#  owners      = ["amazon"]
+#
+#  filter {
+#   name   = "name"
+#    values = ["al2023-ami-*-x86_64"]
+#  }
+#}
+
+data "aws_ami" "almalinux" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["764336703387"] # AlmaLinux OS Foundation
 
   filter {
     name   = "name"
-    values = ["al2023-ami-*-x86_64"]
+    values = ["AlmaLinux OS 9*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
+
 
 locals {
   redirect_domains = {
     web-34 = "tune-snowboarding.com"
-    web-38 = "wc4h16cy93xvaj.net"
-   # web-39 = "awhmdoqexf.com"
-   # web-40 = "agent-miogaginger.com"
-   # web-43 = "zpkwtstcucghuy.com"
-   # web-48 = "xhykcndqlfsnsk.com"
-   # web-51 = "27pckzcv8pccn.com"
-   # web-52 = "0udnenw27gp.com"
-   # web-53 = "attendance-proper.com"
-   # web-54 = "charmingagrarian.com"
-   # web-55 = "backboneimpinge.com"
-   # web-56 = "abattamzwr-gbjr.com"
-   # web-57 = "fdiaksbdibct-hsa.com"
-   # web-58 = "lzyqqkjtrjnwqoni-myhj.com"
-   # web-62 = "gaqgarcwmoylyxgi-iyzd.com"
-   # web-63 = "oonp.alive-netksee.com"
-   # web-64 = "madjievaness.com"
-   # web-65 = "fbnizkgcn.com"
+    #web-38 = "wc4h16cy93xvaj.net"
+    #web-39 = "awhmdoqexf.com"
+    #web-40 = "agent-miogaginger.com"
+    #web-43 = "zpkwtstcucghuy.com"
+    #web-48 = "xhykcndqlfsnsk.com"
+    #web-51 = "27pckzcv8pccn.com"
+    #web-52 = "0udnenw27gp.com"
+    #web-53 = "attendance-proper.com"
+    #web-54 = "charmingagrarian.com"
+    web-55 = "backboneimpinge.com"
+    #web-56 = "abattamzwr-gbjr.com"
+    #web-57 = "fdiaksbdibct-hsa.com"
+    #web-58 = "lzyqqkjtrjnwqoni-myhj.com"
+    #web-62 = "gaqgarcwmoylyxgi-iyzd.com"
+    #web-63 = "oonp.alive-netksee.com"
+    #web-64 = "madjievaness.com"
+    #web-65 = "fbnizkgcn.com"
   }
 }
 
@@ -69,10 +95,38 @@ resource "aws_security_group" "redirect" {
 ############################
 # EC2
 ############################
+#resource "aws_instance" "web" {
+#  for_each = local.redirect_domains
+#
+#  ami           = data.aws_ami.amazon_linux.id
+#  instance_type = "t2.nano"
+#  key_name      = var.key_name
+#
+#  associate_public_ip_address = true
+#
+#  vpc_security_group_ids = [
+#    aws_security_group.redirect.id
+#  ]
+#
+#
+#  user_data = templatefile(
+#    "${path.module}/userdata/apache_redirect.sh.tmpl",
+#    {
+#      redirect_domain = each.value
+#    }
+#  )
+#
+#  tags = {
+#    Name = each.key
+# }
+#}
+
+
 resource "aws_instance" "web" {
   for_each = local.redirect_domains
 
-  ami           = data.aws_ami.amazon_linux.id
+  # ★ AMI を AlmaLinux に変更
+  ami           = data.aws_ami.almalinux.id
   instance_type = "t2.nano"
   key_name      = var.key_name
 
@@ -82,9 +136,9 @@ resource "aws_instance" "web" {
     aws_security_group.redirect.id
   ]
 
-  # ★ ここを追加
+  # ★ 20GB にできる
   root_block_device {
-    volume_size = 20
+    volume_size = 10
     volume_type = "gp3"
   }
 
@@ -99,4 +153,3 @@ resource "aws_instance" "web" {
     Name = each.key
   }
 }
-

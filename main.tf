@@ -8,10 +8,10 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-northeast-1"
+#  region = "ap-northeast-1"
 #  region = "us-east-1"
 #  region = "ap-southeast-2"
-#  region = "ap-northeast-2"
+  region = "ap-southeast-1"
    profile = "aws180"
 }
 
