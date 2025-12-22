@@ -145,9 +145,10 @@ data "aws_ami" "almalinux" {
     values = ["hvm"]
   }
 }
-
+```
 
 ---
+
 
 ## ディレクトリ構成
 
