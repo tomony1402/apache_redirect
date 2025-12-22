@@ -82,6 +82,12 @@ resource "aws_instance" "web" {
     aws_security_group.redirect.id
   ]
 
+  # ★ ここを追加
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+
   user_data = templatefile(
     "${path.module}/userdata/apache_redirect.sh.tmpl",
     {
@@ -93,3 +99,4 @@ resource "aws_instance" "web" {
     Name = each.key
   }
 }
+
