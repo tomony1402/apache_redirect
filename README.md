@@ -195,6 +195,27 @@ RHEL と同等のライフサイクルを持ち、
 
 ---
 
+## EC2定義
+### ⚠️ 実行前の注意点（IAM権限）
+本構成では、EC2がSSMを利用するために `iam_instance_profile` を指定しています。
+Terraformを実行するIAMユーザーには、このロールを「渡す」ための権限が必要です。
+
+**エラー例:** `api error UnauthorizedOperation: You are not authorized to perform: iam:PassRole`
+
+**解決方法:** 実行ユーザーに以下のインラインポリシーをアタッチしてください。
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::276164042029:role/ec2-ssm-kondo"
+        }
+    ]
+}
+
+
 ## ディレクトリ構成
 
 ```text
