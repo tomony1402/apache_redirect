@@ -210,7 +210,7 @@ Terraformを実行するIAMユーザーには、このロールを「渡す」�
         {
             "Effect": "Allow",
             "Action": "iam:PassRole",
-            "Resource": "arn:aws:iam::276164042029:role/ec2-ssm-kondo"
+            "Resource": "arn:aws:iam::[Your-Account-ID]:role/ec2-ssm-kondo"
         }
     ]
 }
