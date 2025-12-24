@@ -203,7 +203,7 @@ Terraformを実行するIAMユーザーには、このロールを「渡す」�
 **エラー例:** `api error UnauthorizedOperation: You are not authorized to perform: iam:PassRole`
 
 **解決方法:** 実行ユーザーに以下のインラインポリシーをアタッチしてください。
-
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -214,7 +214,7 @@ Terraformを実行するIAMユーザーには、このロールを「渡す」�
         }
     ]
 }
-
+```
 
 ## ディレクトリ構成
 
