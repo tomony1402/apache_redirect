@@ -4,7 +4,7 @@ using AlmaLinux, supporting all AWS regions.
 # Apache Redirect on EC2 (Terraform)
 
 このリポジトリは、Terraform を使って  
-Apache によるリダイレクト設定を行った EC2 を構築するためのものです。
+Apache によるリダイレクト設定を行った EC2 を構築するためのものです。  
 各 EC2 には IAM ロールを付与し、AWS Systems Manager (SSM) での管理を前提としています。
 
 HCP Terraform は使用せず、ローカル実行前提で運用します。
