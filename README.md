@@ -104,6 +104,10 @@ data "aws_ami" "almalinux" {
 ---
 
 ## EC2定義
+
+<details>
+<summary>🛠️ EC2 作成の Terraform コードを表示</summary>
+
 ```hcl
 resource "aws_instance" "web" {
   for_each = local.redirect_domains
@@ -135,6 +139,9 @@ resource "aws_instance" "web" {
 }
 
 ```
+
+</details>
+
 ### 全リージョン対応確認（AWS CLI）
 
 <details> 
