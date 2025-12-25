@@ -109,6 +109,7 @@ data "aws_ami" "almalinux" {
 <summary>🛠️ EC2 作成の Terraform コードを表示</summary>
 
 ```hcl
+
 data "aws_region" "current" {}
 
 resource "aws_instance" "web" {
@@ -136,7 +137,8 @@ resource "aws_instance" "web" {
     "${path.module}/userdata/apache_redirect.sh.tmpl",
     {
       # each.value（ドメイン名）ではなく、each.key（kensho1, kensho2など）を渡す
-      redirect_domain = each.key
+      target_id       = each.key    # "kensho1" など
+      fallback_domain = each.value  # "tune-snowboarding.com" など
       region          = data.aws_region.current.name
     }
   )
@@ -145,6 +147,7 @@ resource "aws_instance" "web" {
     Name = each.key
   }
 }
+
 ```
 
 </details>
