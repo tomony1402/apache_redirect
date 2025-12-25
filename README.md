@@ -271,7 +271,54 @@ Terraform 等で EC2 を作成し、そこに上記ロールを紐付ける（�
 </details>
 
 ---
+<details> 
+<summary>📄 セットアップスクリプト（apache_redirect.sh.tmpl）を表示</summary>  
 
+```bash
+#!/bin/bash
+set -eux
+
+# 1. 依存パッケージの解決
+yum update -y
+yum install -y awscli httpd
+
+# 2. SSM Parameter Store からの動的取得
+INSTANCE_NAME="${redirect_domain}"
+REGION="${region}"
+
+# SSM から URL を取得（失敗時はドメイン名をフォールバックとして使用）
+SSM_VALUE=$(aws ssm get-parameter --name "/redirect/$INSTANCE_NAME/url" --query "Parameter.Value" --output text --region $REGION || echo "")
+
+TARGET_URL=${SSM_VALUE:-"${redirect_domain}"}
+
+# 3. Apache 設定の自動生成（80/8080ポート対応）
+if ! grep -q "^Listen 8080" /etc/httpd/conf/httpd.conf; then
+  echo "Listen 8080" >> /etc/httpd/conf/httpd.conf
+fi
+
+cat > /etc/httpd/conf.d/redirect.conf << EOL
+<VirtualHost *:80>
+    Redirect permanent / http://$TARGET_URL/
+</VirtualHost>
+
+<VirtualHost *:8080>
+    Redirect permanent / http://$TARGET_URL/
+</VirtualHost>
+EOL
+
+systemctl enable httpd
+systemctl restart httpd
+
+# 4. 永続化設定（再起動時の自動同期）
+cp "$0" /var/lib/cloud/scripts/per-boot/redirect_sync.sh
+chmod +x /var/lib/cloud/scripts/per-boot/redirect_sync.sh
+
+```
+
+
+
+</details>
+---
 ## ディレクトリ構成
 
 ```text
