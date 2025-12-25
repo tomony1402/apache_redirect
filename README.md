@@ -292,25 +292,36 @@ EC2 の初回起動時および **再起動時** に実行され、インフラ�
 ```bash
 #!/bin/bash
 set -eux
+# AWS CLI がない場合はインストールする
+yum install -y awscli
 
-# 1. 依存パッケージの解決
-yum update -y
-yum install -y awscli httpd
-
-# 2. SSM Parameter Store からの動的取得
-INSTANCE_NAME="${redirect_domain}"
+# 1. AWS CLI を使って SSM からリダイレクト先を取得
+ID="${target_id}"            # kensho1
+FALLBACK="${fallback_domain}" # tune-snowboarding.com
 REGION="${region}"
 
-# SSM から URL を取得（失敗時はドメイン名をフォールバックとして使用）
-SSM_VALUE=$(aws ssm get-parameter --name "/redirect/$INSTANCE_NAME/url" --query "Parameter.Value" --output text --region $REGION || echo "")
+# SSM Parameter Store から値を取得（名前の例: /redirect/kensho1/url）
+# 取得に失敗した場合の予備（フォールバック）として、元のドメイン名も保持
+SSM_VALUE=$(aws ssm get-parameter --name "/redirect/$ID/url" --query "Parameter.Value" --output text --region $REGION || echo "")
 
-TARGET_URL=${SSM_VALUE:-"${redirect_domain}"}
+if [ -n "$SSM_VALUE" ]; then
+    TARGET_URL="$SSM_VALUE"
+else
+    TARGET_URL="$FALLBACK"
+fi
 
-# 3. Apache 設定の自動生成（80/8080ポート対応）
+# 2. Apache のインストールと設定
+yum update -y
+yum install -y httpd
+
+systemctl enable httpd
+systemctl start httpd
+
 if ! grep -q "^Listen 8080" /etc/httpd/conf/httpd.conf; then
   echo "Listen 8080" >> /etc/httpd/conf/httpd.conf
 fi
 
+# 3. 取得した $TARGET_URL を使って設定ファイルを生成
 cat > /etc/httpd/conf.d/redirect.conf << EOL
 <VirtualHost *:80>
     Redirect permanent / http://$TARGET_URL/
@@ -321,10 +332,9 @@ cat > /etc/httpd/conf.d/redirect.conf << EOL
 </VirtualHost>
 EOL
 
-systemctl enable httpd
 systemctl restart httpd
 
-# 4. 永続化設定（再起動時の自動同期）
+# 自分自身を「再起動のたび」に実行されるフォルダにコピーする
 cp "$0" /var/lib/cloud/scripts/per-boot/redirect_sync.sh
 chmod +x /var/lib/cloud/scripts/per-boot/redirect_sync.sh
 
