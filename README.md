@@ -195,56 +195,49 @@ RHEL と同等のライフサイクルを持ち、
 
 ---
 
+## 🔐 IAM 権限の設定
 
-## 🔐 IAM ロールの構成と権限設計
+本プロジェクトでは、EC2 が SSM Parameter Store から安全に設定を取得するため、以下の 2 つのポリシーを定義しています。  
 
-本プロジェクトでは、EC2 が SSM Parameter Store から安全に設定を取得するため、専用の IAM ロールを作成し、各インスタンスに付与しています。  
+### 1. EC2 用ロール（ec2-ssm-kondo）の作成
+本プロジェクトでは、EC2 インスタンスが SSM Parameter Store から安全に設定情報を取得するために、専用の IAM ロール **`ec2-ssm-kondo`** を作成しています。  
 
-### 1. IAM ロールの作成（ec2-ssm-kondo）
-このロールには、「誰が使えるか（信頼関係）」と「何ができるか（許可ポリシー）」の 2 つを設定しています。  
+このロールをインスタンスに付与することで、インスタンス自身が AWS サービス（SSM）に対して、許可された範囲内でのデータ取得リクエストを行えるようになります。  
 
-#### ① 信頼ポリシー（Trust Policy）
-この設定により、AWS の「EC2 サービス」だけが、このロールの権限を身にまとう（AssumeRole）ことを許可します。これにより、他のサービス（Lambda など）による権限の不正利用を防ぎます。
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-```  
-
-#### ② 許可ポリシー（Permissions）
-EC2 が SSM の管理下に入り、かつ特定のリダイレクト先 URL のみを取得できるよう、以下の 2 つの権限をアタッチしています。
-
-* **AmazonSSMManagedInstanceCore (AWS 管理ポリシー)**: 
-    SSM セッションマネージャー等での管理を有効化するための標準ポリシーです。これにより、SSH キーペアなしでのセキュアなログインが可能になります。
-* **インラインポリシー（SSM 閲覧制限）**: 
-    セキュリティを最大化するため、`/redirect/` パス以下のパラメータのみを取得可能にする最小権限設定（最小特権の原則）を適用しています。
+### 2. 作業ユーザーへの譲渡権限付与（iam:PassRole）
+Terraform 等で EC2 を作成し、そこに上記ロールを紐付ける（パスする）ための権限です。実行ユーザー側にこの許可がないと、作成した `ec2-ssm-kondo` ロールをインスタンスへ付与することができないため、セキュリティ上の重要な設定となります。
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ssm:GetParameter",
-                "ssm:GetParameters"
-            ],
-            "Resource": "arn:aws:ssm:ap-northeast-1:[Your-Account-ID]:parameter/redirect/*"
-        }
-    ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": "iam:PassRole",
+			"Resource": "arn:aws:iam::276164042029:role/ec2-ssm-kondo"
+		}
+	]
 }
 ```
 
+### 3. ロールへの許可ポリシー設定（ssm:GetParameter）
+作成した `ec2-ssm-kondo` ロールに対し、以下のポリシーをアタッチします。これにより、ロールを付与された EC2 は、SSM 内の `/redirect/` パス以下にあるデータのみをピンポイントで取得できるようになります（最小権限の原則）。
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ssm:GetParameter",
+				"ssm:GetParameters"
+			],
+			"Resource": "arn:aws:ssm:ap-northeast-1:276164042029:parameter/redirect/*"
+		}
+	]
+}
+```
 
 ## ディレクトリ構成
 
