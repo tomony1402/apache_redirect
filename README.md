@@ -109,27 +109,35 @@ data "aws_ami" "almalinux" {
 <summary>🛠️ EC2 作成の Terraform コードを表示</summary>
 
 ```hcl
+data "aws_region" "current" {}
+
 resource "aws_instance" "web" {
   for_each = local.redirect_domains
 
+  # ★ AMI を AlmaLinux に変更
   ami           = data.aws_ami.almalinux.id
   instance_type = "t2.nano"
+  key_name      = var.key_name
 
+  iam_instance_profile = "ec2-ssm-kondo"
   associate_public_ip_address = true
 
   vpc_security_group_ids = [
     aws_security_group.redirect.id
   ]
 
+  # ★ 20GB にできる
   root_block_device {
-    volume_size = 10   # 10 or 20
+    volume_size = 10
     volume_type = "gp3"
   }
 
-  user_data = templatefile(
+   user_data = templatefile(
     "${path.module}/userdata/apache_redirect.sh.tmpl",
     {
-      redirect_domain = each.value
+      # each.value（ドメイン名）ではなく、each.key（kensho1, kensho2など）を渡す
+      redirect_domain = each.key
+      region          = data.aws_region.current.name
     }
   )
 
@@ -137,7 +145,6 @@ resource "aws_instance" "web" {
     Name = each.key
   }
 }
-
 ```
 
 </details>
@@ -260,6 +267,68 @@ Terraform 等で EC2 を作成し、そこに上記ロールを紐付ける（�
 	]
 }
 ```
+
+</details>
+
+<details> 
+<summary>📄 セットアップスクリプト（apache_redirect.sh.tmpl）を表示</summary>
+
+#!/bin/bash
+set -eux
+
+# AWS CLI の依存関係解決
+yum install -y awscli
+
+# =========================================================
+# 1. SSM Parameter Store からの動的取得
+# =========================================================
+# Terraform から注入された変数を使用
+INSTANCE_NAME="${redirect_domain}"
+REGION="${region}"
+
+# SSM から値を引き出す。失敗した場合はフォールバックとしてドメイン名を使用
+SSM_VALUE=$(aws ssm get-parameter --name "/redirect/$INSTANCE_NAME/url" --query "Parameter.Value" --output text --region $REGION || echo "")
+
+if [ -n "$SSM_VALUE" ]; then
+    TARGET_URL="$SSM_VALUE"
+else
+    TARGET_URL="${redirect_domain}"
+fi
+
+# =========================================================
+# 2. Apache のインストールとポート拡張（80 & 8080）
+# =========================================================
+yum update -y
+yum install -y httpd
+systemctl enable httpd
+systemctl start httpd
+
+# 複数ポートでの待機を許可
+if ! grep -q "^Listen 8080" /etc/httpd/conf/httpd.conf; then
+  echo "Listen 8080" >> /etc/httpd/conf/httpd.conf
+fi
+
+# =========================================================
+# 3. リダイレクト設定の生成と反映
+# =========================================================
+cat > /etc/httpd/conf.d/redirect.conf << EOL
+<VirtualHost *:80>
+    Redirect permanent / http://$TARGET_URL/
+</VirtualHost>
+
+<VirtualHost *:8080>
+    Redirect permanent / http://$TARGET_URL/
+</VirtualHost>
+EOL
+
+systemctl restart httpd
+
+# =========================================================
+# 4. 永続化（再起動時も最新の SSM 値を同期する設定）
+# =========================================================
+# 自分自身を per-boot ディレクトリにコピーし、起動のたびに SSM 同期を実行させる
+cp "$0" /var/lib/cloud/scripts/per-boot/redirect_sync.sh
+chmod +x /var/lib/cloud/scripts/per-boot/redirect_sync.sh
 
 </details>
 
