@@ -195,26 +195,56 @@ RHEL と同等のライフサイクルを持ち、
 
 ---
 
-## EC2定義
-### ⚠️ 実行前の注意点（IAM権限）
-本構成では、EC2がSSMを利用するために `iam_instance_profile` を指定しています。  
-Terraformを実行するIAMユーザーには、このロールを「渡す」ための権限が必要です。
 
-**エラー例:** `api error UnauthorizedOperation: You are not authorized to perform: iam:PassRole`
+## 🔐 IAM ロールの構成と権限設計
 
-**解決方法:** 実行ユーザーに以下のインラインポリシーをアタッチしてください。
+本プロジェクトでは、EC2 が SSM Parameter Store から安全に設定を取得するため、専用の IAM ロールを作成し、各インスタンスに付与しています。  
+
+### 1. IAM ロールの作成（ec2-ssm-kondo）
+このロールには、「誰が使えるか（信頼関係）」と「何ができるか（許可ポリシー）」の 2 つを設定しています。  
+
+#### ① 信頼ポリシー（Trust Policy）
+この設定により、AWS の「EC2 サービス」だけが、このロールの権限を身にまとう（AssumeRole）ことを許可します。これにより、他のサービス（Lambda など）による権限の不正利用を防ぎます。
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```  
+
+#### ② 許可ポリシー（Permissions）
+EC2 が SSM の管理下に入り、かつ特定のリダイレクト先 URL のみを取得できるよう、以下の 2 つの権限をアタッチしています。
+
+* **AmazonSSMManagedInstanceCore (AWS 管理ポリシー)**: 
+    SSM セッションマネージャー等での管理を有効化するための標準ポリシーです。これにより、SSH キーペアなしでのセキュアなログインが可能になります。
+* **インラインポリシー（SSM 閲覧制限）**: 
+    セキュリティを最大化するため、`/redirect/` パス以下のパラメータのみを取得可能にする最小権限設定（最小特権の原則）を適用しています。
+
 ```json
 {
     "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",
-            "Action": "iam:PassRole",
-            "Resource": "arn:aws:iam::[Your-Account-ID]:role/ec2-ssm-kondo"
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+            ],
+            "Resource": "arn:aws:ssm:ap-northeast-1:[Your-Account-ID]:parameter/redirect/*"
         }
     ]
 }
 ```
+
 
 ## ディレクトリ構成
 
