@@ -70,6 +70,9 @@ AMI は **リージョン依存を吸収する設計**にしている。
 AMI ID はリージョンごとに異なるため、  
 **ID を固定せず検索条件で取得**する。
 
+<details>
+<summary>🔍 Terraform での AMI 取得コードを表示</summary>
+
 ```hcl
 data "aws_ami" "almalinux" {
   most_recent = true
@@ -96,6 +99,7 @@ data "aws_ami" "almalinux" {
   }
 }
 ```
+</details>
 
 ---
 
@@ -133,6 +137,9 @@ resource "aws_instance" "web" {
 ```
 ### 全リージョン対応確認（AWS CLI）
 
+<details> 
+<summary>💻 全リージョンの AMI 存在確認コマンド（AWS CLI）</summary>
+
 ```bash
 for r in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text); do
   count=$(aws ec2 describe-images \
@@ -146,6 +153,7 @@ for r in $(aws ec2 describe-regions --query "Regions[].RegionName" --output text
 done
 
 ```
+</details>
 
 ## AlmaLinux サポート期間
 
