@@ -329,7 +329,10 @@ chmod +x /var/lib/cloud/scripts/per-boot/redirect_sync.sh
 
 
 </details>
+
 ---
+
+
 ## ディレクトリ構成
 
 ```text
